@@ -1,8 +1,95 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.guidemeproject.MapsActivity" />
+    tools:context="com.example.guidemeproject.MapsActivity"
+    android:orientation="vertical"
+    android:weightSum="1" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.9"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.8"
+            android:src="@drawable/ic_guide"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"
+            android:text="@string/AppName"
+            android:textSize="20sp"
+            android:textColor="#ffffff"
+            android:gravity="center_vertical"/>
+
+    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/fullMap"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.1">
+
+        <fragment
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.google.android.gms.maps.SupportMapFragment">
+        </fragment>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/circleButton"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="30dp"
+            android:layout_marginRight="30dp"
+            android:src="@drawable/ic_my_location"
+            map:borderWidth="0dp"
+            android:elevation="6dp"
+            map:fabSize="normal"
+            map:pressedTranslationZ="12dp" >
+        </android.support.design.widget.FloatingActionButton>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="#ffffff"
+            android:orientation="horizontal" >
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/inputTextLocation"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_weight="0.2"
+                android:backgroundTint="#ffffff"
+                android:hint="Search location"
+                android:layout_marginLeft="10dp" >
+
+            </android.support.design.widget.TextInputEditText>
+
+            <ImageButton
+                android:id="@+id/searchIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
+                android:src="@drawable/ic_search"
+                android:background="#ffffff" />
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>
+
+
