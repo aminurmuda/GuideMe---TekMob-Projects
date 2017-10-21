@@ -1,9 +1,16 @@
 package com.example.guidemeproject;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -20,6 +27,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -28,6 +39,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ChildEventListener eventChild;
     LocationListener locationListener;
     LocationManager locationManager;
+    private TextInputEditText textInput;
+    private ImageButton imgButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +53,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         database = FirebaseDatabase.getInstance().getReference("warning_road");
         database.push().setValue(marker);
+
+        textInput = (TextInputEditText) findViewById(R.id.inputTextLocation);
+        imgButton = (ImageButton) findViewById(R.id.searchIcon);
+        imgButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                search();
+            }
+        });
+    }
+
+    private void search() {
+        String valueSearch = textInput.getText().toString().trim();
+        if (!TextUtils.isEmpty(valueSearch)) {
+            List <Address> addressList = null;
+            Geocoder geocoder = new Geocoder(MapsActivity.this);
+            try {
+                addressList = geocoder.getFromLocationName(valueSearch, 1);
+                Address address = addressList.get(0);
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            } catch (IOException e){
+                e.printStackTrace();
+                Toast.makeText(this, "Location is not found.", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 
