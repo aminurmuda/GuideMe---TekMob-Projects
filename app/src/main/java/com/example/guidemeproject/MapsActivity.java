@@ -123,6 +123,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
+     * Created by Alifiannisa Lawami Diar on 18/11/2017.
      * Notification at bar
      */
     public void addNotification(){
