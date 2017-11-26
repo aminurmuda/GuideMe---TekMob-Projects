@@ -46,6 +46,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONObject;
@@ -68,12 +69,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList markerPoints= new ArrayList();
     private DatabaseReference database;
     private ChildEventListener eventChild;
+    LocationInformation locationInfo;
     LocationListener locationListener;
     LocationManager locationManager;
     private TextInputEditText textInput;
     private ImageButton imgButton;
     private FloatingActionButton myLocation;
     private Toolbar toolbar;
+    ArrayList<LocationInformation>capsul = new ArrayList<LocationInformation>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +103,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final Button button = findViewById(R.id.button_id);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                addNotification();// Code here executes on main thread after user presses button
+
+                getData();// Code here executes on main thread after user presses button
             }
         });
     }
@@ -122,17 +126,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public void getData(){
+        database.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // Get user value
+                        // LocationInformation l = dataSnapshot.getValue(LocationInformation.class);
+                        for (DataSnapshot s : dataSnapshot.getChildren()) {
+                            LocationInformation locationInfo = s.getValue(LocationInformation.class);
+                            Log.d("DES", s.getKey()+" --- "+locationInfo.getDescription()+"----"+capsul.size());
+                            capsul.add(locationInfo);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Toast.makeText(MapsActivity.this, "Database has Disconnected. Check your connection", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        if(capsul.size()>0) {
+            NotificationCompat.Builder builder =
+                    (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.ic_notification_icon)
+                            .setContentTitle("Notifications")
+                            .setContentText(capsul.get(0).getDescription());
+
+            Intent notificationIntent = new Intent(this, MapsActivity.class);
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.setContentIntent(contentIntent);
+
+            // Add as notification
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.notify(0, builder.build());
+        }
+    }
+
     /**
      * Created by Alifiannisa Lawami Diar on 18/11/2017.
      * Notification at bar
      */
-    public void addNotification(){
+    public void addNotification(String desc){
+        //database.child("bogor").child("description").setValue("There are cars");
 
         NotificationCompat.Builder builder =
-                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_notification_icon)
-                        .setContentTitle("Notifications")
-                        .setContentText("New constraint added!");
+                    (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.ic_notification_icon)
+                            .setContentTitle("Notifications")
+                            .setContentText(desc);
 
         Intent notificationIntent = new Intent(this, MapsActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
@@ -142,6 +185,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.notify(0, builder.build());
+
+
     }
 
     /**

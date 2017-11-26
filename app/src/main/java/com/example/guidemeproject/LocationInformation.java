@@ -10,6 +10,10 @@ public class LocationInformation {
     public String description;
     public String location;
 
+    public LocationInformation(){
+
+    }
+
     public LocationInformation(double longitude, double latitude, String description, String location) {
         this.longitude = longitude;
         this.latitude = latitude;
@@ -17,6 +21,20 @@ public class LocationInformation {
         this.location = location;
     }
 
-    public LocationInformation() {
+    public double getLocationLong() {
+        return longitude;
     }
+
+    public double getLocationLat() {
+        return latitude;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getLocation(){
+        return location;
+    }
+
 }
