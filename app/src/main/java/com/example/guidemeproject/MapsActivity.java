@@ -140,7 +140,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                        /*database.child("bogor").child("description").setValue("There are cars");*/
                        // 2. add new row
 
-                       /* DatabaseReference newdb = database.child("jakarta barat");
+                        /*DatabaseReference newdb = database.child("jakarta barat");
                         LocationInformation alan = new LocationInformation(-6.227777, 106.810544, "Car free day", "Jl. Jend. Sudirman, Daerah Khusus Ibukota Jakarta");
                         newdb.setValue(alan);*/
 
@@ -154,7 +154,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             LocationInformation locationInfo = s.getValue(LocationInformation.class);
                             Log.d("DES", s.getKey()+" --- "+locationInfo.description+"----"+prevsize);
                             capsul.add(locationInfo);
-                            // 3. update table size
                         }
                     }
 
