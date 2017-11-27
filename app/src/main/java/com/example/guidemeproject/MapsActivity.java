@@ -65,6 +65,7 @@ import java.util.Map;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    int prevsize;
     Marker marker;
     ArrayList markerPoints= new ArrayList();
     private DatabaseReference database;
@@ -127,16 +128,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void getData(){
+
         database.addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        // 1. get table  size
+                        for (DataSnapshot s : dataSnapshot.getChildren()) {
+                            prevsize++;
+                        }
+                       /*database.child("bogor").child("description").setValue("There are cars");*/
+                       // 2. add new row
+
+                       /* DatabaseReference newdb = database.child("jakarta barat");
+                        LocationInformation alan = new LocationInformation(-6.227777, 106.810544, "Car free day", "Jl. Jend. Sudirman, Daerah Khusus Ibukota Jakarta");
+                        newdb.setValue(alan);*/
+
+                        DatabaseReference newdb = database.child("jakarta pusat");
+                        LocationInformation newLocation = new LocationInformation(-6.1762, 106.823, "Festival Day", "Jalan Medan Merdeka Barat, Gambir, Kota Jakarta Pusat, DKI Jakarta 10110");
+                        newdb.setValue(newLocation);
+
                         // Get user value
                         // LocationInformation l = dataSnapshot.getValue(LocationInformation.class);
                         for (DataSnapshot s : dataSnapshot.getChildren()) {
                             LocationInformation locationInfo = s.getValue(LocationInformation.class);
-                            Log.d("DES", s.getKey()+" --- "+locationInfo.getDescription()+"----"+capsul.size());
+                            Log.d("DES", s.getKey()+" --- "+locationInfo.description+"----"+prevsize);
                             capsul.add(locationInfo);
+                            // 3. update table size
                         }
                     }
 
@@ -145,13 +163,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Toast.makeText(MapsActivity.this, "Database has Disconnected. Check your connection", Toast.LENGTH_SHORT).show();
                     }
                 });
-
+        Log.d("CAPSUL SIZE", String.valueOf(capsul.size()));
         if(capsul.size()>0) {
             NotificationCompat.Builder builder =
                     (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                             .setSmallIcon(R.drawable.ic_notification_icon)
                             .setContentTitle("Notifications")
-                            .setContentText(capsul.get(0).getDescription());
+                            .setContentText(capsul.get(capsul.size()-1).description+" in "+capsul.get(capsul.size()-1).location); // 4. get lokasi sama descriptionnya
+
 
             Intent notificationIntent = new Intent(this, MapsActivity.class);
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
@@ -161,6 +180,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // Add as notification
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(0, builder.build());
+
+            LatLng latLng = new LatLng(capsul.get(capsul.size()-1).longitude, capsul.get(capsul.size()-1).latitude);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+            mMap.addMarker(new MarkerOptions().position(latLng).title(capsul.get(capsul.size()-1).location).snippet(capsul.get(capsul.size()-1).description));
         }
     }
 

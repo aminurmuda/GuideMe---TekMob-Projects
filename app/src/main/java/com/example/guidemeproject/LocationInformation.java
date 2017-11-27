@@ -21,20 +21,5 @@ public class LocationInformation {
         this.location = location;
     }
 
-    public double getLocationLong() {
-        return longitude;
-    }
-
-    public double getLocationLat() {
-        return latitude;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getLocation(){
-        return location;
-    }
 
 }
