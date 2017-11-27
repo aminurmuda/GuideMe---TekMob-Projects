@@ -185,32 +185,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions().position(latLng).title(capsul.get(capsul.size()-1).location).snippet(capsul.get(capsul.size()-1).description));
         }
     }
-
-    /**
-     * Created by Alifiannisa Lawami Diar on 18/11/2017.
-     * Notification at bar
-     */
-    public void addNotification(String desc){
-        //database.child("bogor").child("description").setValue("There are cars");
-
-        NotificationCompat.Builder builder =
-                    (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.ic_notification_icon)
-                            .setContentTitle("Notifications")
-                            .setContentText(desc);
-
-        Intent notificationIntent = new Intent(this, MapsActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-
-        // Add as notification
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(0, builder.build());
-
-
-    }
-
+    
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
