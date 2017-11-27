@@ -70,10 +70,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ChildEventListener eventChild;
     LocationListener locationListener;
     LocationManager locationManager;
-    private TextInputEditText textInput;
-    private ImageButton imgButton;
+    private TextInputEditText textInputStart;
+    private TextInputEditText textInputDestination;
+    private ImageButton imgButtonStart;
+    private ImageButton imgButtonDestination;
     private FloatingActionButton myLocation;
     private Toolbar toolbar;
+    int prevsize;
+    ArrayList<LocationInformation>capsul = new ArrayList<LocationInformation>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +91,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         database = FirebaseDatabase.getInstance().getReference("warning_road");
         database.push().setValue(marker);
 
-        textInput = (TextInputEditText) findViewById(R.id.inputTextLocation);
-        imgButton = (ImageButton) findViewById(R.id.searchIcon);
-        imgButton.setOnClickListener(new View.OnClickListener() {
+        textInputStart = (TextInputEditText) findViewById(R.id.inputTextLocationStart);
+        textInputDestination = (TextInputEditText) findViewById(R.id.inputTextLocationDestination);
+        imgButtonStart = (ImageButton) findViewById(R.id.searchIconStart);
+        imgButtonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Search();
+                searchStart();
+            }
+        });
+
+        imgButtonDestination = (ImageButton) findViewById(R.id.searchIconDestination);
+        imgButtonDestination.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchDestination();
             }
         });
 
@@ -100,49 +113,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final Button button = findViewById(R.id.button_id);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                addNotification();// Code here executes on main thread after user presses button
+                getData();// Code here executes on main thread after user presses button
             }
         });
     }
 
-    private void search() {
-        String valueSearch = textInput.getText().toString().trim();
-        if (!TextUtils.isEmpty(valueSearch)) {
-            List <Address> addressList = null;
-            Geocoder geocoder = new Geocoder(MapsActivity.this);
-            try {
-                addressList = geocoder.getFromLocationName(valueSearch, 1);
-                Address address = addressList.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            } catch (IOException e){
-                e.printStackTrace();
-                Toast.makeText(this, "Location is not found.", Toast.LENGTH_SHORT).show();
-            }
+    public void getData(){
+
+        database.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // 1. get table  size
+                        for (DataSnapshot s : dataSnapshot.getChildren()) {
+                            prevsize++;
+                        }
+                   /*database.child("bogor").child("description").setValue("There are cars");*/
+                        // 2. add new row
+
+                    /*DatabaseReference newdb = database.child("jakarta barat");
+                    LocationInformation alan = new LocationInformation(-6.227777, 106.810544, "Car free day", "Jl. Jend. Sudirman, Daerah Khusus Ibukota Jakarta");
+                    newdb.setValue(alan);*/
+
+                        DatabaseReference newdb = database.child("jakarta pusat");
+                        LocationInformation newLocation = new LocationInformation(-6.1762, 106.823, "Festival Day", "Jalan Medan Merdeka Barat, Gambir, Kota Jakarta Pusat, DKI Jakarta 10110");
+                        newdb.setValue(newLocation);
+
+                        // Get user value
+                        // LocationInformation l = dataSnapshot.getValue(LocationInformation.class);
+                        for (DataSnapshot s : dataSnapshot.getChildren()) {
+                            LocationInformation locationInfo = s.getValue(LocationInformation.class);
+                            Log.d("DES", s.getKey()+" --- "+locationInfo.description+"----"+prevsize);
+                            capsul.add(locationInfo);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Toast.makeText(MapsActivity.this, "Database has Disconnected. Check your connection", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        Log.d("CAPSUL SIZE", String.valueOf(capsul.size()));
+        if(capsul.size()>0) {
+            NotificationCompat.Builder builder =
+                    (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.ic_notification_icon)
+                            .setContentTitle("Notifications")
+                            .setContentText(capsul.get(capsul.size()-1).description+" in "+capsul.get(capsul.size()-1).location); // 4. get lokasi sama descriptionnya
+
+
+            Intent notificationIntent = new Intent(this, MapsActivity.class);
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.setContentIntent(contentIntent);
+
+            // Add as notification
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.notify(0, builder.build());
+
+            LatLng latLng = new LatLng(capsul.get(capsul.size()-1).longitude, capsul.get(capsul.size()-1).latitude);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+            mMap.addMarker(new MarkerOptions().position(latLng).title(capsul.get(capsul.size()-1).location).snippet(capsul.get(capsul.size()-1).description));
         }
     }
-
-    /**
-     * Notification at bar
-     */
-    public void addNotification(){
-
-        NotificationCompat.Builder builder =
-                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_notification_icon)
-                        .setContentTitle("Notifications")
-                        .setContentText("New constraint added!");
-
-        Intent notificationIntent = new Intent(this, MapsActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-
-        // Add as notification
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(0, builder.build());
-    }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -272,8 +305,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public void Search() {
-        String val_search = textInput.getText().toString().trim();
+    public void searchStart() {
+        String val_search = textInputStart.getText().toString().trim();
         if (!TextUtils.isEmpty(val_search)) {
 
             List<Address> addressList = null;
@@ -282,10 +315,110 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             try {
                 addressList = geocoder.getFromLocationName(val_search, 1);
                 Address address = addressList.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                LatLng latLngStart = new LatLng(address.getLatitude(), address.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLngStart));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngStart, 14));
 
-                Marker markerLocationCari  = mMap.addMarker(new MarkerOptions().position(latLng).title("Searching Location"));
+                Marker markerLocationCari  = mMap.addMarker(new MarkerOptions().position(latLngStart).title("Searching Location"));
+
+                if (markerPoints.size() > 1) {
+                    markerPoints.clear();
+                    mMap.clear();
+                }
+
+                // Adding new item to the ArrayList
+                markerPoints.add(latLngStart);
+
+                // Creating MarkerOptions
+                MarkerOptions options = new MarkerOptions();
+
+                // Setting the position of the marker
+                options.position(latLngStart);
+
+                if (markerPoints.size() == 1) {
+                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                } else if (markerPoints.size() == 2) {
+                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }
+
+                // Add new marker to the Google Map Android API V2
+                mMap.addMarker(options);
+
+                // Checks, whether start and end locations are captured
+                if (markerPoints.size() >= 2) {
+                    LatLng origin = (LatLng) markerPoints.get(0);
+                    LatLng dest = (LatLng) markerPoints.get(1);
+
+                    // Getting URL to the Google Directions API
+                    String url = getDirectionsUrl(origin, dest);
+
+                    DownloadTask downloadTask = new DownloadTask();
+
+                    // Start downloading json data from Google Directions API
+                    downloadTask.execute(url);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Location is not Found", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+    }
+
+    public void searchDestination() {
+        String val_search = textInputDestination.getText().toString().trim();
+        if (!TextUtils.isEmpty(val_search)) {
+
+            List<Address> addressList = null;
+
+            Geocoder geocoder = new Geocoder(MapsActivity.this);
+            try {
+                addressList = geocoder.getFromLocationName(val_search, 1);
+                Address address = addressList.get(0);
+                LatLng latLngDestination = new LatLng(address.getLatitude(), address.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLngDestination));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngDestination, 14));
+
+                Marker markerLocationCari  = mMap.addMarker(new MarkerOptions().position(latLngDestination).title("Searching Location"));
+
+                if (markerPoints.size() > 1) {
+                    markerPoints.clear();
+                    mMap.clear();
+                }
+
+                // Adding new item to the ArrayList
+                markerPoints.add(latLngDestination);
+
+                // Creating MarkerOptions
+                MarkerOptions options = new MarkerOptions();
+
+                // Setting the position of the marker
+                options.position(latLngDestination);
+
+                if (markerPoints.size() == 1) {
+                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                } else if (markerPoints.size() == 2) {
+                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }
+
+                // Add new marker to the Google Map Android API V2
+                mMap.addMarker(options);
+
+                // Checks, whether start and end locations are captured
+                if (markerPoints.size() >= 2) {
+                    LatLng origin = (LatLng) markerPoints.get(0);
+                    LatLng dest = (LatLng) markerPoints.get(1);
+
+                    // Getting URL to the Google Directions API
+                    String url = getDirectionsUrl(origin, dest);
+
+                    DownloadTask downloadTask = new DownloadTask();
+
+                    // Start downloading json data from Google Directions API
+                    downloadTask.execute(url);
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
