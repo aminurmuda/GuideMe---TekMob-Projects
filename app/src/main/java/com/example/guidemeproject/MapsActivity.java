@@ -181,7 +181,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 });
         Log.d("CAPSUL SIZE", String.valueOf(capsul.size()));
         if(capsul.size()>0) {
-            NotificationCompat.Builder builder =
+           NotificationCompat.Builder builder =
                     (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                             .setSmallIcon(R.drawable.ic_notification_icon)
                             .setContentTitle("Notifications")
