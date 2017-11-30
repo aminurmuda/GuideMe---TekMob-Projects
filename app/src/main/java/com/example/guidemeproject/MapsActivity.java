@@ -3,6 +3,7 @@ package com.example.guidemeproject;
 import android.*;
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -32,10 +33,13 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import android.content.DialogInterface;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -70,7 +74,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList markerPoints= new ArrayList();
     private DatabaseReference database;
     private ChildEventListener eventChild;
-    LocationInformation locationInfo;
     LocationListener locationListener;
     LocationManager locationManager;
     private TextInputEditText textInput;
@@ -78,7 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingActionButton myLocation;
     private Toolbar toolbar;
     ArrayList<LocationInformation>capsul = new ArrayList<LocationInformation>();
-
+    Button button;
+    Button button_warn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,13 +105,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         myLocation = (FloatingActionButton) findViewById(R.id.circleButton);
-        final Button button = findViewById(R.id.button_id);
+
+        button = findViewById(R.id.button_id);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
                 getData();// Code here executes on main thread after user presses button
             }
         });
+
+        button_warn = findViewById(R.id.warning_button);
+        button_warn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                open(v);// Code here executes on main thread after user presses button
+            }
+        });
+
+
+
     }
 
     private void search() {
@@ -144,9 +159,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         LocationInformation alan = new LocationInformation(-6.227777, 106.810544, "Car free day", "Jl. Jend. Sudirman, Daerah Khusus Ibukota Jakarta");
                         newdb.setValue(alan);*/
 
-                        DatabaseReference newdb = database.child("jakarta pusat");
+                        /*DatabaseReference newdb = database.child("jakarta pusat");
                         LocationInformation newLocation = new LocationInformation(-6.1762, 106.823, "Festival Day", "Jalan Medan Merdeka Barat, Gambir, Kota Jakarta Pusat, DKI Jakarta 10110");
-                        newdb.setValue(newLocation);
+                        newdb.setValue(newLocation);*/
+
+                        /*DatabaseReference newdb = database.child("depok");
+                        LocationInformation newLocation = new LocationInformation(-6.3640102, 106.8286607, "This road is fixed", "Jl. Prof. Dr. Nugroho Notosutanto");
+                        newdb.setValue(newLocation);*/
 
                         // Get user value
                         // LocationInformation l = dataSnapshot.getValue(LocationInformation.class);
@@ -185,7 +204,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions().position(latLng).title(capsul.get(capsul.size()-1).location).snippet(capsul.get(capsul.size()-1).description));
         }
     }
-    
+
+    public void open(View view){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("Are you sure, You wanted to make decision");
+                alertDialogBuilder.setPositiveButton("YES",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                Toast.makeText(MapsActivity.this,"You clicked yes button",Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+        alertDialogBuilder.setNegativeButton("NO",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -210,7 +250,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     LocationInformation locationInfo = s.getValue(LocationInformation.class);
                     LatLng latLng = new LatLng(locationInfo.longitude, locationInfo.latitude);
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(locationInfo.location).snippet(locationInfo.description));
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(locationInfo.location).snippet(locationInfo.description).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_not_allowed)));
 
                 }
             }
