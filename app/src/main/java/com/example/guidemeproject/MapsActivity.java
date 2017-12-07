@@ -203,6 +203,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // to detect if 200 meters away from the restricted road
+    public void detectDistance(double currentLatitude, double destLatitude, double currentLongitude, double destLongitude){
+        double latitude=destLatitude;
+        double longitude=destLongitude;
+        float distance=0;
+        Location crntLocation=new Location("crntlocation");
+        crntLocation.setLatitude(currentLatitude);
+        crntLocation.setLongitude(currentLongitude);
+
+        Location newLocation=new Location("newlocation");
+        newLocation.setLatitude(latitude);
+        newLocation.setLongitude(longitude);
+
+
+        //float distance = crntLocation.distanceTo(newLocation);  in meters
+       // distance =crntLocation.distanceTo(newLocation) / 1000;
+    }
+
     public void open(View view){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("Are you sure, You wanted to make decision");
