@@ -221,6 +221,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
        // distance =crntLocation.distanceTo(newLocation) / 1000;
     }
 
+
+    //dialog warning
     public void open(View view){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("Are you sure, You wanted to make decision");
