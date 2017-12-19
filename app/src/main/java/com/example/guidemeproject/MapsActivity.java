@@ -204,7 +204,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     // to detect if 200 meters away from the restricted road
-    public void detectDistance(double currentLatitude, double destLatitude, double currentLongitude, double destLongitude){
+    public float detectDistance(double currentLatitude, double destLatitude, double currentLongitude, double destLongitude){
         double latitude=destLatitude;
         double longitude=destLongitude;
         float distance=0;
@@ -217,7 +217,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         newLocation.setLongitude(longitude);
 
 
-        //float distance = crntLocation.distanceTo(newLocation);  in meters
+        float distance = crntLocation.distanceTo(newLocation); // in meters
+        return distance;
        // distance =crntLocation.distanceTo(newLocation) / 1000;
     }
 
